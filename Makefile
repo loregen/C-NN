@@ -8,10 +8,11 @@ DEBUG_LFLAGS = -lm -lpthread -g
 
 ifeq ($(shell uname -s),Darwin)
     LFLAGS += -framework Accelerate
-	DEBUG_LFLAGS += -framework Accelerate
+    CFLAGS += -DACCELERATE_NEW_LAPACK
+    DEBUG_LFLAGS += -framework Accelerate
 else
     LFLAGS += -lblas
-	DEBUG_LFLAGS += -lblas
+    DEBUG_LFLAGS += -lblas
 endif
 
 MAIN = mnistnet
