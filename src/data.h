@@ -2,6 +2,7 @@
 #define DATA_H
 
 #include <stdbool.h>
+#include "tensor.h"
 #include "macros.h"
 
 typedef enum DataType_{
@@ -17,14 +18,13 @@ typedef enum LabelType_{
 typedef struct Dataset_{
     DataType type;
     uint32_t n_examples;
-    uint32_t inpsize, outsize;
+    uint32_t example_size, label_size;
     LabelType label_type;
-    double *examples;
-    double *labels;
+    Tensor examples;
+    Tensor labels;
 }Dataset;
 
-Dataset data_read(char *file_path, int n_examples, DataType data_type, LabelType label_type, int inpsize, int outsize, bool normalize);
-int read_mnist_txt(double *training_data, double *labels, char *file_name);
+Dataset data_read(char *file_path, uint32_t n_examples, DataType data_type, LabelType label_type, uint8_t example_dim, size_t *example_shape, uint32_t output_size);
 void data_free(Dataset *data);
 
 #endif

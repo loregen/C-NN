@@ -34,4 +34,12 @@
 
 #define SQUARE(x) ((x)*(x))
 
+#define CHECK_NULL(pointer)                                \
+    do {                                                    \
+        if (pointer == NULL) {                              \
+            printf("CHECK_NULL: pointer is NULL\n");        \
+            exit(EXIT_FAILURE);                             \
+        }                                                   \
+    } while (0)
+
 #endif

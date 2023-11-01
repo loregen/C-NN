@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 #include <math.h>
 #include "array.h"
@@ -17,7 +18,7 @@ void shuffle(int *pattern, int size) {
     }
 
     // Seed the random number generator
-    uint32_t seed = time(NULL);
+    uint32_t seed = 42;
 
     // Perform the Fisher-Yates shuffle
     for (i = size - 1; i > 0; i--) {
@@ -110,3 +111,10 @@ double array_sum(double *m, int size){
     return sum;
 }
 
+void matrix_print(double *m, int rows, int cols){
+    for(int i = 0; i < rows; i++){
+        for(int j = 0; j < cols; j++) printf("%.3lf ", m[i * cols + j]);
+        printf("\n");
+    }
+    printf("\n");
+}

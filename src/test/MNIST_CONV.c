@@ -27,11 +27,13 @@ int main(void){
     
     net_compile(&net);
 
-    Dataset mnist_train_data = data_read(PATH_TO_TRAIN, N_TRAIN_EX, TRAIN, ONEHOT, 784, 10, true);
+   Dataset mnist_train_data = data_read(PATH_TO_TRAIN, N_TRAIN_EX, TRAIN, ONEHOT, 1, input_shape, 10);
+    Tensor_scale(&mnist_train_data.examples, 1.0 / 255.0);
 
-    net_train(&net, &mnist_train_data, BATCH_SIZE, CROSS_ENTROPY_ONEHOT, LEARNING_RATE, N_EPOCHS);
+    net_train(&net, &mnist_train_data, BATCH_SIZE, CROSS_ENTROPY_ONEHOT, LEARNING_RATE, N_EPOCHS, true);
 
-    Dataset mnist_test_data = data_read(PATH_TO_TEST, N_TEST_EX, TEST, ONEHOT, 784, 10, true);
+    Dataset mnist_test_data = data_read(PATH_TO_TEST, N_TEST_EX, TEST, ONEHOT, 1, input_shape, 10);
+    Tensor_scale(&mnist_test_data.examples, 1.0 / 255.0);
 
     net_predict(&net, &mnist_test_data);
 

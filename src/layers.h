@@ -5,7 +5,7 @@
 #include "tensor.h"
 #include "array.h"
 
-typedef struct TrainVars_ TrainVars; // Forward declaration
+typedef struct Net_ Net; //forward declaration
 
 typedef enum LayerType_{
     DENSE,
@@ -15,11 +15,16 @@ typedef enum LayerType_{
     ACTIVATION_SIGM,
     ACTIVATION_SOFTMAX,
     ACTIVATION_RELU,
+    FLATTEN
 }LayerType;
 
 typedef struct Layer_{
     LayerType type;
     uint32_t index;
+
+    //do not include batch size as first dimension, used for shape checking during net compilation
+    uint8_t input_dim, output_dim; 
+    size_t input_shape[3], output_shape[3];
 
     Tensor input, output;
     Tensor input_grad, output_grad;
@@ -28,13 +33,16 @@ typedef struct Layer_{
 
     void (*forward)(struct Layer_ *self);
     void (*backward)(struct Layer_ *self);
-    void (*update)(struct Layer_ *self, TrainVars *vars);   
+    void (*update)(struct Layer_ *self, Net *net);   
 
     void (*free)(struct Layer_ *self);
-    void (*print)(struct Layer_ *self);
+    void (*print)(struct Layer_ *self, bool print_output, bool print_output_grad);
     void (*check_shapes)(struct Layer_ *self);
-    void (*allocate_grads)(struct Layer_ *self);
-    void (*free_grads)(struct Layer_ *self);
+    
+    void (*forward_init)(struct Layer_ *self, uint32_t batch_size);
+    void (*backward_init)(struct Layer_ *self);
+    void (*forward_exit)(struct Layer_ *self);
+    void (*backward_exit)(struct Layer_ *self);
 }Layer;
 
 typedef struct DenseLayer_{
@@ -56,7 +64,7 @@ typedef struct Conv2DLayer_{
 
     Tensor kernels, biases;  
     Tensor kernels_grad, biases_grad;
-    Tensor im2col;
+    Tensor im2col_forward, im2col_backward;
 
     uint32_t output_rows, output_cols;
 
@@ -68,42 +76,55 @@ typedef struct Conv2DLayer_{
 
 }Conv2DLayer;
 
-void Layer_print(Layer *base);
+typedef struct DenseParams_{
+    uint32_t outsize;
+}DenseParams;
 
-DenseLayer *DenseLayer_init(int inpsize, int outsize);
-void DenseLayer_allocate_grads(Layer *base);
+typedef struct Conv2DParams_{
+    uint32_t n_kernels, kernel_rows, kernel_cols;
+}Conv2DParams;
+
+typedef union LayerParams_{
+    DenseParams dense;
+    Conv2DParams conv2d;
+}LayerParams;
+
+void Layer_print(Layer *base, bool print_output, bool print_output_grad);
+
+DenseLayer *DenseLayer_init(uint32_t inpsize, uint32_t outsize);
+void DenseLayer_backward_init(Layer *base);
 void DenseLayer_free(Layer *base);
-void DenseLayer_free_grads(Layer *base);
+void DenseLayer_backward_exit(Layer *base);
 void DenseLayer_forward(Layer *base);
 void DenseLayer_backward(Layer *base);
-void DenseLayer_update(Layer *base, TrainVars *train_vars);
+void DenseLayer_update(Layer *base, Net *net);
 void DenseLayer_check_shapes(Layer *base);
 
-Layer *ActivationLayer_init(uint8_t input_dim, size_t *shape, bool flatten_output);
-void ActivationLayer_allocate_grads(Layer *base);
+Layer *ActivationLayer_init(uint8_t input_dim, size_t *shape);
+void ActivationLayer_backward_init(Layer *base);
 void ActivationLayer_free(Layer *base);
-void ActivationLayer_free_grads(Layer *base);;
+void ActivationLayer_backward_exit(Layer *base);
 void ActivationLayer_check_shapes(Layer *base);
 
-TanhLayer *TanhLayer_init(uint8_t input_dim, size_t *input_shape, bool flatten_output);
+TanhLayer *TanhLayer_init(uint8_t input_dim, size_t *input_shape);
 void TanhLayer_forward(Layer *base);
 void TanhLayer_backward(Layer *base);
 
-SoftmaxLayer *SoftmaxLayer_init(uint8_t input_dim, size_t *input_shape, bool flatten_output);
+SoftmaxLayer *SoftmaxLayer_init(uint8_t input_dim, size_t *input_shape);
 void SoftmaxLayer_forward(Layer *base);
 void SoftmaxLayer_backward(Layer *base);
 
-ReluLayer *ReluLayer_init(uint8_t input_dim, size_t *input_shape, bool flatten_output);
+ReluLayer *ReluLayer_init(uint8_t input_dim, size_t *input_shape);
 void ReluLayer_forward(Layer *base);
 void ReluLayer_backward(Layer *base);
 
 Conv2DLayer *Conv2DLayer_init(int input_rows, int input_cols, int depth, int n_kernels, int kernel_rows, int kernel_cols);
-void Conv2DLayer_allocate_grads(Layer *base);
+void Conv2DLayer_backward_init(Layer *base);
 void Conv2DLayer_free(Layer *base);
-void Conv2DLayer_free_grads(Layer *base);
+void Conv2DLayer_backward_exit(Layer *base);
 void Conv2DLayer_forward(Layer *base);
 void Conv2DLayer_backward(Layer *base);
-void Conv2DLayer_update(Layer *base, TrainVars *train_vars);
+void Conv2DLayer_update(Layer *base, Net *net);
 void Conv2DLayer_check_shapes(Layer *base);
 
 #endif
