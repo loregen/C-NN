@@ -24,6 +24,13 @@ Download from [NIST](http://www.itl.nist.gov/iaui/vip/cs_links/EMNIST/gzip.zip) 
 Set the dataset path in `MNIST_DENSE.c`.
 
 ### Compilation
+
+Before compiling, create a `bin` and `obj` directory:
+
+```bash
+mkdir bin obj
+```
+
 Use `make` to compile the project:
     
 ```bash
