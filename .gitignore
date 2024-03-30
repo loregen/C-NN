@@ -1,2 +1,9 @@
 .DS_Store
 MNIST_DATA/
+
+#object files
+*.o
+
+#executable files
+*.out
+
