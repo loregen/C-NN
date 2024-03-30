@@ -14,6 +14,8 @@
 
 Dataset data_read(char *file_path, uint32_t n_examples, DataType data_type, LabelType label_type, uint8_t example_dim, size_t *example_shape, uint32_t label_size){
     
+    printf("Reading file \"%s\"...\n", file_path);
+
     FILE *file;
     if((file = fopen(file_path, "r")) == NULL){
         printf("data_read: could not open file \"%s\".\n", file_path);
