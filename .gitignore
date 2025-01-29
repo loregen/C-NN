@@ -1,5 +1,4 @@
 .DS_Store
-MNIST_DATA/
 
 #object files
 *.o
@@ -7,3 +6,5 @@ MNIST_DATA/
 #executable files
 *.out
 
+build/
+MNIST_DATA/
